@@ -8,14 +8,7 @@
     </v-toolbar>
     <div class="messages-container">
       <div v-for="(message, i) in getMessages" :key="i">
-        <v-card outlined v-if="message.user == 'friend'" class='ma-3 teal accent-4'>
-          <v-card-subtitle class="font-weight-bold">{{ $route.params.name }}</v-card-subtitle>
-          <v-card-text>{{ message.text}}</v-card-text>
-        </v-card>
-        <v-card outlined v-else class='ma-3 grey lighten-2'>
-          <v-card-subtitle class="font-weight-bold">Eu</v-card-subtitle>
-          <v-card-text>{{ message.text}}</v-card-text>
-        </v-card>
+        <MessageCard :messageProp='message' />
       </div>
     </div>
     <v-app-bar color="#424242" fixed bottom>
@@ -28,10 +21,14 @@
 </template>
 
 <script>
+import MessageCard from './components/MessageCard.vue'
 import { mapGetters } from 'vuex'
 
 export default {
   name: "App",
+  components: {
+    MessageCard
+  },
   data: () => ({
     field: ''
   }),
