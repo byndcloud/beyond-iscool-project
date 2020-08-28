@@ -5,6 +5,7 @@
         <v-list-item-title>{{ user.name }}</v-list-item-title>
       </v-list-item>
     </v-list>
+    <v-btn  color="primary" dark @click="logout"> Sair</v-btn>
   </v-main>
 </template>
 
@@ -15,6 +16,9 @@ export default {
   methods: {
     openChat(userName) {
       this.$router.push(`chat/${userName}`)
+    },
+    logout () {
+      this.$store.dispatch('users/logout')
     }
   },
   computed: {

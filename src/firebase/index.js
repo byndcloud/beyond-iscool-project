@@ -6,17 +6,18 @@ import 'firebase/auth'
 
 
 const firebaseConfig = {
-	apiKey: "AIzaSyCjZnRkugZ8G1kSCWzDjejOrRtX5QKgvXo",
-	authDomain: "beyondschool-9e3c9.firebaseapp.com",
-	databaseURL: "https://beyondschool-9e3c9.firebaseio.com",
-	projectId: "beyondschool-9e3c9",
-	storageBucket: "beyondschool-9e3c9.appspot.com",
-	messagingSenderId: "639415364531",
-	appId: "1:639415364531:web:d2781ff572e381bbddb9c6"
+	apiKey: "AIzaSyDy3xPHZpBUv8OaZqO4iKLA8b2vRHpZsSA",
+    authDomain: "bcschool2-4487c.firebaseapp.com",
+    databaseURL: "https://bcschool2-4487c.firebaseio.com",
+    projectId: "bcschool2-4487c",
+    storageBucket: "bcschool2-4487c.appspot.com",
+    messagingSenderId: "502849360532",
+    appId: "1:502849360532:web:0a24cc450538c882f29a81"
 };
 
 // Initialize Firebase
 export const firebaseApp = firebase.initializeApp(firebaseConfig);
+export const auth = firebase.auth()
 
 
 export default function setFirebase (Vue) {
