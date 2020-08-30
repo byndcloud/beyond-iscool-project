@@ -39,7 +39,7 @@ const users = {
     loginError: null
   },
   getters: {
-    getMessages: (state) => {
+    getMessages: state => {
       return state.messages
     }
   },
@@ -51,12 +51,12 @@ const users = {
       const { email, password } = payload
       auth
         .createUserWithEmailAndPassword(email, password)
-        .then((res) => {
+        .then(res => {
           console.log(res)
           commit('setUser', res.user)
           router.push('/')
         })
-        .catch((err) => {
+        .catch(err => {
           commit('setLoginError', err)
           console.error(err)
         })
@@ -65,12 +65,12 @@ const users = {
       const { email, password } = payload
       auth
         .signInWithEmailAndPassword(email, password)
-        .then((res) => {
+        .then(res => {
           console.log(res)
           commit('setUser', res.user)
           router.push('/')
         })
-        .catch((err) => {
+        .catch(err => {
           commit('setLoginError', err)
           console.error(err)
         })
@@ -79,10 +79,10 @@ const users = {
     logout({}) {
       auth
         .signOut()
-        .then((res) => {
+        .then(res => {
           console.log(res)
         })
-        .catch((err) => {
+        .catch(err => {
           console.error(err)
         })
     }
@@ -106,7 +106,7 @@ const chat = {
     messages: []
   },
   getters: {
-    getMessages: (state) => {
+    getMessages: state => {
       return state.messages
     }
   },
@@ -118,11 +118,40 @@ const chat = {
       commit('addMessage', message)
     },
     async getDoggyMessage ({ commit }) {
-      const url = 'https://api.thedogapi.com/v1/images/search'
-      const response = await axios.get(url)
+      const url = 'https://api.thedogapi.com/v1/images/search?limit=1'
+      const response = await axios.get(url, {
+        headers: {
+          'x-api-key': 'dcfdb2e1-9d5c-4d60-98ca-069bb106650f'
+        }
+      })
       const dogInfo = response.data[0]
       dogInfo.messageType = 'dog'
+      dogInfo.favorite = false
       commit('addMessage', dogInfo)
+    },
+    async favorite (context, dog) {
+      const url = 'https://api.thedogapi.com/v1/favourites'
+      const config = {
+        headers: {
+          'x-api-key': 'dcfdb2e1-9d5c-4d60-98ca-069bb106650f'
+        }
+      }
+      console.log(`dog info`, dog)
+      try {
+        if (dog.favorite) {
+          const response = await axios.post(url, {
+            image_id: dog.id
+          }, config)
+          console.log(`response`, response)
+          return response.data.id
+        } else {
+          const response = await axios.delete(`${url}/${dog.favoriteId}`, config)
+          console.log(`delete response`, response)
+          return null
+        }
+      } catch (e) {
+        console.log(e.response)
+      }
     }
   },
   mutations: {
@@ -172,5 +201,5 @@ new Vue({
   router,
   store,
   vuetify,
-  render: (h) => h(App)
+  render: h => h(App)
 }).$mount('#app')

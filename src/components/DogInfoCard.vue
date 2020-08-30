@@ -1,13 +1,16 @@
 <template>
   <v-card outlined class="ma-3 green accent-4">
-    <v-card-subtitle class="font-weight-bold">The Dog API</v-card-subtitle>
-    <v-img
-      :src="dog.url"
-      :lazy-src="lazy"
-      height="auto"
-      width="100%"
-      :aspect-ratio="dog.width / dog.height"
-    />
+    <v-card-actions>
+      <span class="font-weight-bold">The Dog API</span>
+      <v-spacer></v-spacer>
+      <v-btn icon @click="toggleFavorite"
+        ><v-icon :color="dog.favorite ? 'red' : undefined">{{
+          dog.favorite ? 'mdi-heart' : 'mdi-heart-outline'
+        }}</v-icon></v-btn
+      >
+    </v-card-actions>
+    <!-- <v-card-subtitle class=""></v-card-subtitle> -->
+    <v-img :src="dog.url" :lazy-src="lazy" height="auto" width="100%" />
     <v-card-text v-if="breedInfo">
       <div><b>Name:</b> {{ breedInfo.name || 'unknown' }}</div>
       <div><b>Temperament:</b> {{ breedInfo.temperament || 'unknown' }}</div>
@@ -36,9 +39,15 @@ export default {
         'https://cdn4.vectorstock.com/i/1000x1000/32/18/central-asian-shepherd-dog-flat-icon-doggy-head-vector-18623218.jpg'
     }
   },
+  methods: {
+    async toggleFavorite () {
+      this.dog.favorite = !this.dog.favorite
+      const favoriteId = await this.$store.dispatch('chat/favorite', this.dog)
+      this.dog.favoriteId = favoriteId
+    }
+  },
   computed: {
     breedInfo () {
-      console.log(`breed info`, this.dog)
       return this.dog.breeds && this.dog.breeds[0]
     }
   }

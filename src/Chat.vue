@@ -11,7 +11,7 @@
       </v-btn>
     </v-toolbar>
     <div class="messages-container">
-      <div v-for="(message, i) in getMessages" :key="i">
+      <div class="message" v-for="(message, i) in getMessages" :key="i">
         <DogInfoCard v-if="message.messageType === 'dog'" :dog="message" />
         <MessageCard v-else :messageProp="message" />
       </div>
@@ -46,19 +46,26 @@ export default {
     field: ''
   }),
   methods: {
-    send () {
+    async send () {
       let message = {
         user: 'me',
         text: this.field
       }
       this.$store.dispatch('chat/sendMessage', message)
       if (this.field.toLowerCase().includes('dog')) {
-        this.$store.dispatch('chat/getDoggyMessage')
+        await this.$store.dispatch('chat/getDoggyMessage')
       }
+      this.$nextTick(() => {
+        this.scrollToBottom()
+      })
       this.field = ''
     },
     clearMessages () {
       this.$store.dispatch('chat/clear')
+    },
+    scrollToBottom () {
+      const messages = document.querySelector('.messages-container')
+      window.scrollTo({ top: messages.scrollHeight, behavior: 'smooth' })
     }
   },
   computed: {
