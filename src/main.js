@@ -8,8 +8,8 @@ import VuexPersistence from 'vuex-persist'
 import VueRouter from 'vue-router'
 import Firebase, { auth } from './firebase'
 import Login from './Login'
+import axios from 'axios'
 Vue.config.productionTip = false
-
 
 Vue.use(Firebase)
 Vue.use(Vuex)
@@ -18,9 +18,7 @@ Vue.use(VueRouter)
 const vuexPersist = new VuexPersistence({
   key: `beyond`,
   storage: window.localStorage,
-  modules: [
-    'chat'
-  ]
+  modules: ['chat']
 })
 
 const users = {
@@ -41,49 +39,52 @@ const users = {
     loginError: null
   },
   getters: {
-    getMessages: state => {
+    getMessages: (state) => {
       return state.messages
     }
   },
   actions: {
-    sendMessage({ commit }, message) {
+    sendMessage ({ commit }, message) {
       commit('addMessage', message)
     },
     async createAcc ({ commit }, payload) {
       const { email, password } = payload
-      auth.createUserWithEmailAndPassword( email, password )
-      .then((res) => {
-        console.log(res)
-        commit( 'setUser', res.user)
-        router.push('/')
-      })
-      .catch((err) => {
-        commit( 'setLoginError', err)
-        console.error(err)
-      })
+      auth
+        .createUserWithEmailAndPassword(email, password)
+        .then((res) => {
+          console.log(res)
+          commit('setUser', res.user)
+          router.push('/')
+        })
+        .catch((err) => {
+          commit('setLoginError', err)
+          console.error(err)
+        })
     },
-    async login ({ commit },  payload) {
+    async login ({ commit }, payload) {
       const { email, password } = payload
-      auth.signInWithEmailAndPassword( email, password)
-      .then((res) => {
-        console.log(res)
-        commit( 'setUser', res.user)
-        router.push('/')
-      })
-      .catch((err) => {
-        commit( 'setLoginError', err)
-        console.error(err)
-      })
+      auth
+        .signInWithEmailAndPassword(email, password)
+        .then((res) => {
+          console.log(res)
+          commit('setUser', res.user)
+          router.push('/')
+        })
+        .catch((err) => {
+          commit('setLoginError', err)
+          console.error(err)
+        })
     },
-// eslint-disable-next-line
-    logout ({ }) {
-      auth.signOut()
-      .then((res) => {
-        console.log(res)
-      })
-      .catch((err) => {
-        console.error(err)
-      })
+    // eslint-disable-next-line
+    logout({}) {
+      auth
+        .signOut()
+        .then((res) => {
+          console.log(res)
+        })
+        .catch((err) => {
+          console.error(err)
+        })
     }
   },
   mutations: {
@@ -102,24 +103,34 @@ const users = {
 const chat = {
   namespaced: true,
   state: {
-    messages: [
-      { user: "friend", text: "Olá, pode me ajudar?" },
-      { user: "friend", text: "Sei que não falo contigo há bastante tempo mas estou escrevendo bastante aqui para termos um exemplo real de mensagem." }
-    ]
+    messages: []
   },
   getters: {
-    getMessages: state => {
+    getMessages: (state) => {
       return state.messages
     }
   },
   actions: {
-    sendMessage({ commit }, message) {
+    clear ({ commit }) {
+      commit('deleteAllMessages')
+    },
+    sendMessage ({ commit }, message) {
       commit('addMessage', message)
+    },
+    async getDoggyMessage ({ commit }) {
+      const url = 'https://api.thedogapi.com/v1/images/search'
+      const response = await axios.get(url)
+      const dogInfo = response.data[0]
+      dogInfo.messageType = 'dog'
+      commit('addMessage', dogInfo)
     }
   },
   mutations: {
     addMessage (state, message) {
       state.messages.push(message)
+    },
+    deleteAllMessages (state) {
+      state.messages = []
     }
   }
 }
@@ -161,5 +172,5 @@ new Vue({
   router,
   store,
   vuetify,
-  render: h => h(App)
+  render: (h) => h(App)
 }).$mount('#app')
