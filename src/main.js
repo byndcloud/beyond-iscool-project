@@ -6,7 +6,7 @@ import vuetify from './plugins/vuetify'
 import Vuex from 'vuex'
 import VuexPersistence from 'vuex-persist'
 import VueRouter from 'vue-router'
-import Firebase, { auth } from './firebase'
+import Firebase, { auth, firestore, storage } from './firebase'
 import Login from './Login'
 Vue.config.productionTip = false
 
@@ -19,7 +19,8 @@ const vuexPersist = new VuexPersistence({
   key: `beyond`,
   storage: window.localStorage,
   modules: [
-    'chat'
+    'chat',
+    'users'
   ]
 })
 
@@ -41,8 +42,8 @@ const users = {
     loginError: null
   },
   getters: {
-    getMessages: state => {
-      return state.messages
+    getUser: state => {
+      return state.user
     }
   },
   actions: {
@@ -58,7 +59,7 @@ const users = {
         router.push('/')
       })
       .catch((err) => {
-        commit( 'setLoginError', err)
+        commit('setLoginError', err)
         console.error(err)
       })
     },
@@ -67,11 +68,11 @@ const users = {
       auth.signInWithEmailAndPassword( email, password)
       .then((res) => {
         console.log(res)
-        commit( 'setUser', res.user)
+        commit('setUser', res.user)
         router.push('/')
       })
       .catch((err) => {
-        commit( 'setLoginError', err)
+        commit('setLoginError', err)
         console.error(err)
       })
     },
@@ -108,13 +109,26 @@ const chat = {
     ]
   },
   getters: {
-    getMessages: state => {
-      return state.messages
-    }
   },
   actions: {
-    sendMessage({ commit }, message) {
-      commit('addMessage', message)
+// eslint-disable-next-line
+    async sendMessage({ commit }, message) {
+      try {
+        if (message.file) {
+          const uploadResult = await storage.ref().child(`${message.user}/${message.to}/image`).put(message.file)
+          console.log(uploadResult)
+          message.file = true
+        } else {
+          message.file = false
+        }
+        message.created_at = + new Date()
+        message.file_url = ''
+        await firestore.collection('messages').add(message)
+        console.log('Funcionou o envio da mensagem!! uhuuu')
+      }
+      catch (err) {
+        console.log(err)
+      }
     }
   },
   mutations: {
