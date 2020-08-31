@@ -26,26 +26,26 @@
 </template>
 <script>
 export default {
-    data () {
-        return {
-            createAccDialog: false,
-            newEmail: '',
-            email: '',
-            newPassword: '',
-            password: ''
-        }
-    },
-    methods: {
-        createAcc () {
-            this.$store.dispatch('users/createAcc', { email: this.newEmail, password: this.newPassword })
-            this.newEmail = ''
-            this.newPassword = ''
-        },
-        login () {
-            this.$store.dispatch('users/login', { email: this.email, password: this.password })
-            this.email = ''
-            this.password = ''
-        }
+  data () {
+    return {
+      createAccDialog: false,
+      newEmail: '',
+      email: '',
+      newPassword: '',
+      password: ''
     }
+  },
+  methods: {
+    createAcc () {
+      this.$store.dispatch('users/createAcc', { email: this.newEmail, password: this.newPassword })
+      this.newEmail = ''
+      this.newPassword = ''
+    },
+    login () {
+      this.$store.dispatch('users/login', { email: this.email, password: this.password })
+      this.email = ''
+      this.password = ''
+    }
+  }
 }
 </script>

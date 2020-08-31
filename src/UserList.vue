@@ -14,7 +14,7 @@ import { mapState } from 'vuex'
 
 export default {
   methods: {
-    openChat(userName) {
+    openChat (userName) {
       this.$router.push(`chat/${userName}`)
     },
     logout () {

@@ -8,8 +8,8 @@ import VuexPersistence from 'vuex-persist'
 import VueRouter from 'vue-router'
 import Firebase, { auth, firestore, storage } from './firebase'
 import Login from './Login'
+import axios from 'axios'
 Vue.config.productionTip = false
-
 
 Vue.use(Firebase)
 Vue.use(Vuex)
@@ -47,44 +47,47 @@ const users = {
     }
   },
   actions: {
-    sendMessage({ commit }, message) {
+    sendMessage ({ commit }, message) {
       commit('addMessage', message)
     },
     async createAcc ({ commit }, payload) {
       const { email, password } = payload
-      auth.createUserWithEmailAndPassword( email, password )
-      .then((res) => {
-        console.log(res)
-        commit( 'setUser', res.user)
-        router.push('/')
-      })
-      .catch((err) => {
-        commit('setLoginError', err)
-        console.error(err)
-      })
+      auth
+        .createUserWithEmailAndPassword(email, password)
+        .then(res => {
+          console.log(res)
+          commit('setUser', res.user)
+          router.push('/')
+        })
+        .catch(err => {
+          commit('setLoginError', err)
+          console.error(err)
+        })
     },
-    async login ({ commit },  payload) {
+    async login ({ commit }, payload) {
       const { email, password } = payload
-      auth.signInWithEmailAndPassword( email, password)
-      .then((res) => {
-        console.log(res)
-        commit('setUser', res.user)
-        router.push('/')
-      })
-      .catch((err) => {
-        commit('setLoginError', err)
-        console.error(err)
-      })
+      auth
+        .signInWithEmailAndPassword(email, password)
+        .then(res => {
+          console.log(res)
+          commit('setUser', res.user)
+          router.push('/')
+        })
+        .catch(err => {
+          commit('setLoginError', err)
+          console.error(err)
+        })
     },
-// eslint-disable-next-line
-    logout ({ }) {
-      auth.signOut()
-      .then((res) => {
-        console.log(res)
-      })
-      .catch((err) => {
-        console.error(err)
-      })
+    // eslint-disable-next-line
+    logout({}) {
+      auth
+        .signOut()
+        .then(res => {
+          console.log(res)
+        })
+        .catch(err => {
+          console.error(err)
+        })
     }
   },
   mutations: {
@@ -103,10 +106,7 @@ const users = {
 const chat = {
   namespaced: true,
   state: {
-    messages: [
-      { user: "friend", text: "Olá, pode me ajudar?" },
-      { user: "friend", text: "Sei que não falo contigo há bastante tempo mas estou escrevendo bastante aqui para termos um exemplo real de mensagem." }
-    ]
+    messages: []
   },
   getters: {
   },
@@ -129,11 +129,53 @@ const chat = {
       catch (err) {
         console.log(err)
       }
+    },
+    clear ({ commit }) {
+      commit('deleteAllMessages')
+    },
+    async getDoggyMessage ({ commit }) {
+      const url = 'https://api.thedogapi.com/v1/images/search?limit=1'
+      const response = await axios.get(url, {
+        headers: {
+          'x-api-key': 'dcfdb2e1-9d5c-4d60-98ca-069bb106650f'
+        }
+      })
+      const dogInfo = response.data[0]
+      dogInfo.messageType = 'dog'
+      dogInfo.favorite = false
+      commit('addMessage', dogInfo)
+    },
+    async favorite (context, dog) {
+      const url = 'https://api.thedogapi.com/v1/favourites'
+      const config = {
+        headers: {
+          'x-api-key': 'dcfdb2e1-9d5c-4d60-98ca-069bb106650f'
+        }
+      }
+      console.log(`dog info`, dog)
+      try {
+        if (dog.favorite) {
+          const response = await axios.post(url, {
+            image_id: dog.id
+          }, config)
+          console.log(`response`, response)
+          return response.data.id
+        } else {
+          const response = await axios.delete(`${url}/${dog.favoriteId}`, config)
+          console.log(`delete response`, response)
+          return null
+        }
+      } catch (e) {
+        console.log(e.response)
+      }
     }
   },
   mutations: {
     addMessage (state, message) {
       state.messages.push(message)
+    },
+    deleteAllMessages (state) {
+      state.messages = []
     }
   }
 }

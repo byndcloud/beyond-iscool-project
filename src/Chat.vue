@@ -5,22 +5,31 @@
         <v-icon>mdi-chevron-left</v-icon>
       </v-btn>
       <v-toolbar-title>{{ $route.params.name }}</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn x-large icon @click="clearMessages">
+        <v-icon>mdi-playlist-remove</v-icon>
+      </v-btn>
     </v-toolbar>
     <div class="messages-container">
-      <div v-for="(message, i) in messages" :key="i">
-        <MessageCard :messageProp='message' />
+      <div class="message" v-for="(message, i) in getMessages" :key="i">
+        <DogInfoCard v-if="message.messageType === 'dog'" :dog="message" />
+        <MessageCard v-else :messageProp="message" />
       </div>
     </div>
     <v-app-bar color="#424242" fixed bottom>
-      <v-text-field v-model='field' @keyup.enter='send()' solo label="Mensagem..." hide-details v-if="!fileMode"></v-text-field>
-      <v-file-input v-model="file" accept="image/*" label="Clique aqui para adicionar uma imagem" solo hide-details v-if="fileMode"></v-file-input>
+      <v-text-field
+        v-model="field"
+        @keyup.enter="send()"
+        solo
+        label="Mensagem..."
+        hide-details
+      ></v-text-field>
+     <v-file-input v-model="file" accept="image/*" label="Clique aqui para adicionar uma imagem" solo hide-details v-if="fileMode"></v-file-input>
       <v-btn @click='fileMode = !fileMode' icon color="blue">
         <v-icon v-if="!fileMode">mdi-camera</v-icon>
         <v-icon v-if="fileMode">mdi-text</v-icon>
       </v-btn>
       <v-btn @click='send()' icon color="blue">
-        <v-icon>mdi-send</v-icon>
-      </v-btn>
     </v-app-bar>
   </v-main>
 </template>
@@ -28,12 +37,14 @@
 <script>
 import MessageCard from './components/MessageCard.vue'
 import { firestore } from './firebase'
+import DogInfoCard from './components/DogInfoCard.vue'
 import { mapGetters } from 'vuex'
 
 export default {
-  name: "App",
+  name: 'App',
   components: {
-    MessageCard
+    MessageCard,
+    DogInfoCard
   },
   data: () => ({
     field: '',
@@ -42,7 +53,7 @@ export default {
     messages: []
   }),
   methods: {
-    send () {
+    async send () {
       let message = {
         user: this.getUser.email,
         text: this.field,
@@ -50,8 +61,21 @@ export default {
         to: this.$route.params.name
       }
       this.$store.dispatch('chat/sendMessage', message)
+      if (this.field.toLowerCase().includes('dog')) {
+        await this.$store.dispatch('chat/getDoggyMessage')
+      }
+      this.$nextTick(() => {
+        this.scrollToBottom()
+      })
       this.field = ''
       this.file = null
+    },
+    clearMessages () {
+      this.$store.dispatch('chat/clear')
+    },
+    scrollToBottom () {
+      const messages = document.querySelector('.messages-container')
+      window.scrollTo({ top: messages.scrollHeight, behavior: 'smooth' })
     }
   },
   computed: {
@@ -69,6 +93,8 @@ export default {
 }
 </script>
 
-<style>
-
+<style scoped>
+.messages-container {
+  padding-bottom: 66px;
+}
 </style>
