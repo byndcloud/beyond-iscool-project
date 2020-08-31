@@ -29,7 +29,7 @@
         <v-icon v-if="!fileMode">mdi-camera</v-icon>
         <v-icon v-if="fileMode">mdi-text</v-icon>
       </v-btn>
-      <v-btn @click='send()' icon color="blue">
+      <v-btn @click='send()' icon color="blue"></v-btn>
     </v-app-bar>
   </v-main>
 </template>
